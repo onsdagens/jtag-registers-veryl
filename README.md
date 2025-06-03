@@ -15,7 +15,7 @@ The toolchain consists of:
 - [NextPNR](https://github.com/YosysHQ/nextpnr?tab=readme-ov-file#getting-started) for place and route
 - [OpenOCD](https://openocd.org/pages/getting-openocd.html) for programming the device
 - [Project Trellis](https://github.com/YosysHQ/prjtrellis) for bitstream generation, and other device specifics
-
+- [ftdaye](https://github.com/onsdagens/ftdaye/) for interacting with the JTAG module from the host machine.
 ## Building and programming
 
 With the toolchain set up, and the dev board connected, run 
