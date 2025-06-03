@@ -1,5 +1,5 @@
 [project]
-name = "jtag_regs_veryl"
+name = "jtag_registers"
 version = "0.1.0"
 
 [dependencies]
