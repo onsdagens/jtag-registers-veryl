@@ -1,0 +1,9 @@
+[project]
+name = "jtag_regs_veryl"
+version = "0.1.0"
+
+[dependencies]
+tap_controller = { git = "https://github.com/onsdagens/tap-controller-veryl.git", version = "0.1.0" }
+
+[build]
+exclude_std = true

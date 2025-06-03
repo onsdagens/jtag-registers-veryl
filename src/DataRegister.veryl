@@ -1,0 +1,47 @@
+// TODO: Use a type parameter instead, for now it seems there is no language support
+module DataRegister::<DataSize: u32> #(
+    // Hopefully this is automatically cast for complex types
+    param InitialValue: logic<DataSize> = 0       ,
+    param Width       : u32             = DataSize,
+    param Addr        : logic<4>        = 0       ,
+    param Writeable   : bool            = false   ,
+) (
+    bit_out: output logic          ,
+    tck_i  : input  clock          ,
+    rst_ni : input  reset_async_low,
+
+    tms_i        : input logic   ,
+    cdr_i        : input logic   ,
+    sdr_i        : input logic   ,
+    tdi_i        : input logic   ,
+    udr_i        : input logic   ,
+    instruction_i: input logic<4>,
+
+    register_o      : output logic<DataSize>,
+    shift_register_o: output logic<DataSize>,
+) {
+    var shift_register  : logic<DataSize>;
+    assign bit_out          = shift_register[lsb];
+    var register        : logic<DataSize>;
+    assign register_o       = register;
+    assign shift_register_o = shift_register;
+    always_ff {
+        if_reset {
+            shift_register = 0;
+            register       = InitialValue;
+        } else {
+            // capture DR
+            if cdr_i {
+                shift_register = register;
+                // same as in instruction reg, tms_i being needed here is
+                // not nice
+            } else if sdr_i && (tms_i == 0) {
+                shift_register      = shift_register >> 1;
+                shift_register[msb] = tdi_i;
+            } else if udr_i && Writeable {
+                register = shift_register;
+            }
+
+        }
+    }
+}

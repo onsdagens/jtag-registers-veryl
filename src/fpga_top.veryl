@@ -1,0 +1,118 @@
+module JTAGRegistersFPGATop (
+    rst_ni: input  reset_async_low,
+    tck_i : input  clock          ,
+    tms_i : input  logic          ,
+    tdi_i : input  logic          ,
+    tdo_o : output logic          ,
+    led0  : output logic          ,
+    led1  : output logic          ,
+    led2  : output logic          ,
+    led3  : output logic          ,
+) {
+    // --- Intermediate signals
+    var outputs   : logic [16];
+    var idcode_out: logic     ;
+    var data_out  : logic     ;
+    // these should be connected to TDO of each
+    // data register
+    assign outputs[0]  = 0;
+    assign outputs[1]  = data_out;
+    assign outputs[2]  = 0;
+    assign outputs[3]  = 0;
+    assign outputs[4]  = 0;
+    assign outputs[5]  = 0;
+    assign outputs[6]  = idcode_out;
+    assign outputs[7]  = 0;
+    assign outputs[8]  = 0;
+    assign outputs[9]  = 0;
+    assign outputs[10] = 0;
+    assign outputs[11] = 0;
+    assign outputs[12] = 0;
+    assign outputs[13] = 0;
+    assign outputs[14] = 0;
+    assign outputs[15] = 0;
+
+
+    // ---
+    // --- TAP Controller
+    var tap_sdr: logic;
+    var tap_sir: logic;
+    var tap_uir: logic;
+    var tap_cdr: logic;
+    var tap_udr: logic;
+    inst tap: tap_controller::TAPController (
+        rst  : rst_ni ,
+        TCK  : tck_i  ,
+        TMS  : tms_i  ,
+        SDR  : tap_sdr,
+        SIR  : tap_sir,
+        UIR  : tap_uir,
+        CDR  : tap_cdr,
+        UDR  : tap_udr,
+        state: _      ,
+    );
+    // ---
+    // --- Instruction reg
+    var ireg_insn: logic<4>;
+    inst insn_reg: InstructionRegister (
+        rst_ni           ,
+        tdi_i            ,
+        tck_i            ,
+        tms_i            ,
+        sir_i : tap_sir  ,
+        uir_i : tap_uir  ,
+        insn_o: ireg_insn,
+    );
+
+    assign tdo_o = outputs[ireg_insn];
+    // --- IDCODE STANDARD REG
+    inst idcode_reg: DataRegister::<32> #(
+        InitialValue: 'hDEADBEEF, // give our module ID 0xDEADBEEF
+        Addr        : 'b0110    , // standard IDCODE address
+    ) (
+        bit_out: idcode_out,
+        tck_i              ,
+        rst_ni             ,
+
+        cdr_i           : tap_cdr  ,
+        sdr_i           : tap_sdr  ,
+        tdi_i                      ,
+        udr_i           : tap_udr  ,
+        tms_i                      ,
+        instruction_i   : ireg_insn,
+        register_o      : _        ,
+        shift_register_o: _        ,
+    );
+    // ---
+
+    // --- CUSTOM DATA REG
+    // here we can technically up the throughput by capturing TDO directly,
+    // but i don't really care for the extra edge case for some ~10% extra
+    // on an already Mbit+ line when we are sending <100kB.
+    var data_reg_o: logic<4>;
+    inst data_reg: DataRegister::<4> #(
+        Writeable: true  ,
+        Addr     : 'b0001,
+    ) (
+        bit_out: data_out,
+        tck_i            ,
+        rst_ni           ,
+
+        cdr_i        : tap_cdr  ,
+        sdr_i        : tap_sdr  ,
+        tdi_i                   ,
+        udr_i        : tap_udr  ,
+        tms_i                   ,
+        instruction_i: ireg_insn,
+
+        register_o      : data_reg_o,
+        shift_register_o: _         ,
+    );
+
+    // Bit display of received nibble for minimal functionality
+    assign led0 = data_reg_o[0];
+    assign led1 = data_reg_o[1];
+    assign led2 = data_reg_o[2];
+    assign led3 = data_reg_o[3];
+    // ---
+}

@@ -1,0 +1,35 @@
+module InstructionRegister (
+    rst_ni: input reset_async_low,
+    tdi_i : input logic          ,
+    tck_i : input clock          ,
+    // i think we need this unfortunately or we will shift out
+    tms_i: input logic,
+    // essentially a write enable
+    sir_i: input logic,
+    // captures shift register into
+    // actual register
+    uir_i: input logic,
+    // this is the captured instruction
+    insn_o: output logic<4>,
+) {
+    var shift_register: logic<4>;
+    var data          : logic<4>;
+
+    assign insn_o = data;
+    always_ff {
+        if_reset {
+            shift_register = 0;
+            data           = 0;
+
+        } else {
+            // that tms is even involved here is abit ...
+            if sir_i && (tms_i == 0) {
+                shift_register      = shift_register >> 1;
+                shift_register[msb] = tdi_i;
+
+            } else if uir_i {
+                data = shift_register;
+            }
+        }
+    }
+}
