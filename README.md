@@ -28,4 +28,4 @@ to build the project and reprogram the FPGA.
 
 The FPGA example implements a standard `IDCODE` register returning `0xDEADBEEF`. Additionally, a custom 4-bit data register is provided at address `0b0001`. The current content of the register is displayed using the green LEDs as a bit display.
 
-For low level communication with the JTAG module from a host device, we have been using the [`ftdaye` `ECP5` example](https://github.com/onsdagens/ftdaye/blob/master/examples/ECP5.rs). It contains minimal examples of manipulating the state machine, and reading from and writing to registers.
+For low level communication with the JTAG module from a host device, we have been using the [ftdaye `ECP5` example](https://github.com/onsdagens/ftdaye/blob/master/examples/ECP5.rs). It contains minimal examples of manipulating the state machine, and reading from and writing to registers.
