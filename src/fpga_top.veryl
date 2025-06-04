@@ -89,8 +89,8 @@ module JTAGRegistersFPGATop (
     // here we can technically up the throughput by capturing TDO directly,
     // but i don't really care for the extra edge case for some ~10% extra
     // on an already Mbit+ line when we are sending <100kB.
-    var data_reg_o: logic<4>;
-    inst data_reg: DataRegister::<4> #(
+    var data_reg_o: logic<8>;
+    inst data_reg: DataRegister::<8> #(
         Writeable: true  ,
         Addr     : 'b0001,
     ) (
