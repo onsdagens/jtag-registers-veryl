@@ -1,6 +1,6 @@
 [project]
 name = "jtag_registers"
-version = "0.1.0"
+version = "0.1.1"
 
 [dependencies]
 tap_controller = { git = "https://github.com/onsdagens/tap-controller-veryl.git", version = "0.1.0" }
